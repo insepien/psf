@@ -129,11 +129,12 @@ def fig_config(fig, psf_inst_ax, psf_intg_ax, wf_ax, psf_vmax, psf_nx, psf_scale
 
 
 def make_movie(args):
+    rng = galsim.BaseDeviate(args.seed)
     # set altitude of each screen and its weight
     alts, weights = set_alts_weights(args.nlayers)
 
     # set wind speed and dir for each screen
-    spd, dirn, r0_500 = set_wind_spd_dir(args.nlayers, args.max_speed, args.argr0_500, args.weights, args.seed)
+    spd, dirn, r0_500 = set_wind_spd_dir(args.nlayers, args.max_speed, args.r0_500, weights, args.seed)
 
     # field angle at which to compute psf
     theta1 = (args.xs[0] * galsim.arcmin, args.ys[0] * galsim.arcmin)
@@ -157,11 +158,11 @@ def make_movie(args):
 
     # configuring figures
     psf_inst_im1, psf_intg_im1, wf_im1, etext_inst1, etext_intg1 = fig_config(fig, psf_inst_ax1, psf_intg_ax1, wf_ax1,
-                                                                              psf_vmax, psf_nx, psf_scale, wf_vmax,
-                                                                              args.coord[0], aper, x1, y1)
+                                                                              args.psf_vmax, args.psf_nx, args.psf_scale, args.wf_vmax,
+                                                                              args.coord[0], aper, args.xs[0], args.ys[0])
     psf_inst_im2, psf_intg_im2, wf_im2, etext_inst2, etext_intg2 = fig_config(fig, psf_inst_ax2, psf_intg_ax2, wf_ax2,
-                                                                              psf_vmax, psf_nx, psf_scale, wf_vmax,
-                                                                              args.coord[1], aper, x2, y2)
+                                                                              args.psf_vmax, args.psf_nx, args.psf_scale, args.wf_vmax,
+                                                                              args.coord[1], aper, args.xs[1], args.ys[1])
 
     nstep = int(args.exptime / args.time_step)
     t0 = 0.0
@@ -176,8 +177,8 @@ def make_movie(args):
         with writer.saving(fig, args.outfile, 100):
             for i in range(nstep):
                 # create GSobjects
-                wf1, psfinst1, psfintg1 = create_GSO(t0, theta1, args.lam, aper, time_step, atm)
-                wf2, psfinst2, psfintg2 = create_GSO(t0, theta2, args.lam, aper, time_step, atm)
+                wf1, psfinst1, psfintg1 = create_GSO(t0, theta1, args.lam, aper, args.time_step, atm)
+                wf2, psfinst2, psfintg2 = create_GSO(t0, theta2, args.lam, aper, args.time_step, atm)
 
                 # draw and update images
                 psf_inst_img_f1, e_inst1 = update_img(psf_inst_img_sum1, psfinst1, args.accumulate, i, args.psf_nx,
