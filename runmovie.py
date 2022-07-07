@@ -158,11 +158,13 @@ def make_movie(args):
 
     # configuring figures
     psf_inst_im1, psf_intg_im1, wf_im1, etext_inst1, etext_intg1 = fig_config(fig, psf_inst_ax1, psf_intg_ax1, wf_ax1,
-                                                                              args.psf_vmax, args.psf_nx, args.psf_scale, args.wf_vmax,
-                                                                              args.coord[0], aper, args.xs[0], args.ys[0])
+                                                                              args.psf_vmax, args.psf_nx, args.psf_scale,
+                                                                              args.wf_vmax, args.coord[0], aper,
+                                                                              args.xs[0], args.ys[0])
     psf_inst_im2, psf_intg_im2, wf_im2, etext_inst2, etext_intg2 = fig_config(fig, psf_inst_ax2, psf_intg_ax2, wf_ax2,
-                                                                              args.psf_vmax, args.psf_nx, args.psf_scale, args.wf_vmax,
-                                                                              args.coord[1], aper, args.xs[1], args.ys[1])
+                                                                              args.psf_vmax, args.psf_nx, args.psf_scale,
+                                                                              args.wf_vmax,args.coord[1], aper,
+                                                                              args.xs[1], args.ys[1])
 
     nstep = int(args.exptime / args.time_step)
     t0 = 0.0
@@ -270,6 +272,9 @@ if __name__ == '__main__':
     parser.add_argument("--accumulate", action='store_true',
                         help="Set to accumulate flux over exposure, as opposed to displaying the "
                              "instantaneous PSF.  Default: False")
+    parser.add_argument("--accumulateint", action='store_false',
+                        help="Set to accumulate flux over exposure, as opposed to displaying the "
+                             "instantaneous PSF.  Default: True")
 
     parser.add_argument("--pad_factor", type=float, default=1.0,
                         help="Factor by which to pad PSF InterpolatedImage to avoid aliasing. "
@@ -288,7 +293,7 @@ if __name__ == '__main__':
     parser.add_argument("--outfile", type=str, default="output/psf_wf_movie.mp4",
                         help="Output filename.  Default: output/psf_wf_movie.mp4")
 
-    parser.add_argument("--output_coordinate", type=list, default=[np.r_[-1, 1, -1, 1], np.r_[-1, 0, -1, 0]],
+    parser.add_argument("--coord", type=list, default=[np.r_[-1, 1, -1, 1], np.r_[-1, 0, -1, 0]],
                         help="Position of the PSF center on output image. Default: (0,0) top, (-0.5,-0.5) bottom")
 
     args = parser.parse_args()
