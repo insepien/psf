@@ -77,7 +77,7 @@ def update_img(psf_img_sum, PSF, accumulate, i, psf_nx, psf_scale):
     return psf_img_f, e
 
 
-def fig_config(fig, psf_inst_ax, psf_intg_ax, wf_ax, psf_vmax, psf_nx, psf_scale, wf_vmax, coor, aper, xi, yi):
+def fig_config(fig, psf_inst_ax, psf_intg_ax, wf_ax, psf_vmax, psf_nx, psf_scale, wf_vmax, coor, aper, x, y):
     # Axis for the inst PSF
     fig.set_facecolor("k")
     psf_inst_ax.set_xlabel("Arcsec")
@@ -85,7 +85,7 @@ def fig_config(fig, psf_inst_ax, psf_intg_ax, wf_ax, psf_vmax, psf_nx, psf_scale
     psf_inst_im = psf_inst_ax.imshow(np.ones((128, 128), dtype=np.float64), animated=True,
                                      vmin=0.0, vmax=psf_vmax, cmap='hot',
                                      extent=coor * 0.5 * psf_nx * psf_scale)
-    psf_inst_ax.set_title("PSF at (%d', %d') on focal plane " % (xi, yi))
+    psf_inst_ax.set_title("Instantaneous PSF at (%d', %d')" % (x, y))
 
     # Axis for the intg PSF
     psf_intg_ax.set_xlabel("Arcsec")
@@ -93,7 +93,7 @@ def fig_config(fig, psf_inst_ax, psf_intg_ax, wf_ax, psf_vmax, psf_nx, psf_scale
     psf_intg_im = psf_intg_ax.imshow(np.ones((128, 128), dtype=np.float64), animated=True,
                                      vmin=0.0, vmax=psf_vmax, cmap='hot',
                                      extent=coor * 0.5 * psf_nx * psf_scale)
-    psf_intg_ax.set_title("Integrated PSF")
+    psf_intg_ax.set_title("PSF integrated over time")
 
     # Axis for the wavefront image on the right.
     wf_ax.set_xlabel("Meters")
@@ -128,8 +128,10 @@ def fig_config(fig, psf_inst_ax, psf_intg_ax, wf_ax, psf_vmax, psf_nx, psf_scale
     return psf_inst_im, psf_intg_im, wf_im, etext_inst, etext_intg
 
 
+
 def make_movie(args):
     rng = galsim.BaseDeviate(args.seed)
+
     # set altitude of each screen and its weight
     alts, weights = set_alts_weights(args.nlayers)
 
@@ -149,6 +151,7 @@ def make_movie(args):
                            strut_angle=args.strut_angle * galsim.degrees,
                            screen_list=atm, pad_factor=args.pad_factor,
                            oversampling=args.oversampling)
+
     # create Fig frame
     metadata = dict(title='Wavefront Movie', artist='Matplotlib')
     writer = anim.FFMpegWriter(fps=15, bitrate=5000, metadata=metadata)
@@ -163,7 +166,7 @@ def make_movie(args):
                                                                               args.xs[0], args.ys[0])
     psf_inst_im2, psf_intg_im2, wf_im2, etext_inst2, etext_intg2 = fig_config(fig, psf_inst_ax2, psf_intg_ax2, wf_ax2,
                                                                               args.psf_vmax, args.psf_nx, args.psf_scale,
-                                                                              args.wf_vmax,args.coord[1], aper,
+                                                                              args.wf_vmax, args.coord[1], aper,
                                                                               args.xs[1], args.ys[1])
 
     nstep = int(args.exptime / args.time_step)
@@ -174,60 +177,54 @@ def make_movie(args):
     psf_intg_img_sum1 = galsim.ImageD(args.psf_nx, args.psf_nx, scale=args.psf_scale)
     psf_inst_img_sum2 = galsim.ImageD(args.psf_nx, args.psf_nx, scale=args.psf_scale)
     psf_intg_img_sum2 = galsim.ImageD(args.psf_nx, args.psf_nx, scale=args.psf_scale)
-
     with ProgressBar(nstep) as bar:
-        with writer.saving(fig, args.outfile, 100):
+        with writer.saving(fig, "psf_movie_addStar.mp4", 100):
             for i in range(nstep):
                 # create GSobjects
                 wf1, psfinst1, psfintg1 = create_GSO(t0, theta1, args.lam, aper, args.time_step, atm)
                 wf2, psfinst2, psfintg2 = create_GSO(t0, theta2, args.lam, aper, args.time_step, atm)
 
                 # draw and update images
-                psf_inst_img_f1, e_inst1 = update_img(psf_inst_img_sum1, psfinst1, args.accumulate, i, args.psf_nx,
-                                                      args.psf_scale)
-                psf_intg_img_f1, e_intg1 = update_img(psf_intg_img_sum1, psfintg1, args.accumulateint, i, args.psf_nx,
-                                                      args.psf_scale)
-                psf_inst_img_f2, e_inst2 = update_img(psf_inst_img_sum2, psfinst2, args.accumulate, i, args.psf_nx,
-                                                      args.psf_scale)
-                psf_intg_img_f2, e_intg2 = update_img(psf_intg_img_sum2, psfintg2, args.accumulateint, i, args.psf_nx,
-                                                      args.psf_scale)
+                psf_inst_img_f1, e_inst1 = update_img(psf_inst_img_sum1, psfinst1, args.accumulate, i,  args.psf_nx,  args.psf_scale)
+                psf_intg_img_f1, e_intg1 = update_img(psf_intg_img_sum1, psfintg1, args.accumulateint, i,  args.psf_nx,  args.psf_scale)
+                psf_inst_img_f2, e_inst2 = update_img(psf_inst_img_sum2, psfinst2, args.accumulate, i,  args.psf_nx,  args.psf_scale)
+                psf_intg_img_f2, e_intg2 = update_img(psf_intg_img_sum2, psfintg2, args.accumulateint, i,  args.psf_nx,  args.psf_scale)
 
                 # Update t0 for the next movie frame.
-                t0 += args.time_step
+                t0 +=  args.time_step
 
                 # Matplotlib code updating plot elements
                 wf_im1.set_array(wf1)
                 psf_inst_im1.set_array(psf_inst_img_f1.array)
                 psf_intg_im1.set_array(psf_intg_img_f1.array)
-                wf_ax1.set_title("Wavefront Image. t={:5.2f} s".format(i * args.time_step))
+                wf_ax1.set_title("Wavefront Image. t={:5.2f} s".format(i *  args.time_step))
                 etext_inst1.set_text("$e_1$={:6.3f}, $e_2$={:6.3f}, $r^2$={:6.3f}".format(
-                    e_inst1['e1'], e_inst1['e2'], e_inst1['rsqr'] * args.psf_scale ** 2))
+                    e_inst1['e1'], e_inst1['e2'], e_inst1['rsqr'] *  args.psf_scale ** 2))
                 etext_intg1.set_text("$e_1$={:6.3f}, $e_2$={:6.3f}, $r^2$={:6.3f}".format(
-                    e_intg1['e1'], e_intg1['e2'], e_intg1['rsqr'] * args.psf_scale ** 2))
+                    e_intg1['e1'], e_intg1['e2'], e_intg1['rsqr'] *  args.psf_scale ** 2))
 
                 wf_im2.set_array(wf2)
                 psf_inst_im2.set_array(psf_inst_img_f2.array)
                 psf_intg_im2.set_array(psf_intg_img_f2.array)
-                wf_ax2.set_title("Wavefront Image. t={:5.2f} s".format(i * args.time_step))
+                wf_ax2.set_title("Wavefront Image. t={:5.2f} s".format(i *  args.time_step))
                 etext_inst2.set_text("$e_1$={:6.3f}, $e_2$={:6.3f}, $r^2$={:6.3f}".format(
-                    e_inst2['e1'], e_inst2['e2'], e_inst2['rsqr'] * args.psf_scale ** 2))
+                    e_inst2['e1'], e_inst2['e2'], e_inst2['rsqr'] *  args.psf_scale ** 2))
                 etext_intg2.set_text("$e_1$={:6.3f}, $e_2$={:6.3f}, $r^2$={:6.3f}".format(
-                    e_intg2['e1'], e_intg2['e2'], e_intg2['rsqr'] * args.psf_scale ** 2))
+                    e_intg2['e1'], e_intg2['e2'], e_intg2['rsqr'] *  args.psf_scale ** 2))
 
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     writer.grab_frame(facecolor=fig.get_facecolor())
                 bar.update()
 
-
 if __name__ == '__main__':
     from argparse import ArgumentParser, RawDescriptionHelpFormatter
-
     parser = ArgumentParser(description=(
-        """
-        Script to visualize the build up of an atmospheric PSF due to a frozen-flow Kolmogorov atmospheric
-        phase screens.  Note that the ffmpeg command line tool is required to run this script.
-        """), formatter_class=RawDescriptionHelpFormatter)
+"""
+Script to visualize the build up of an atmospheric PSF due to a frozen-flow Kolmogorov atmospheric
+phase screens.  Note that the ffmpeg command line tool is required to run this script. Added integrated frame and shift 
+location on focal plane 
+"""), formatter_class=RawDescriptionHelpFormatter)
 
     parser.add_argument("--seed", type=int, default=1,
                         help="Random number seed for generating turbulence.  Default: 1")
@@ -247,9 +244,9 @@ if __name__ == '__main__':
                         help="Resolution of atmospheric screen in meters.  Default: 0.1")
     parser.add_argument("--max_speed", type=float, default=20.0,
                         help="Maximum wind speed in m/s.  Default: 20.0")
-    parser.add_argument("-xs", type=list, default=[0, 0],
+    parser.add_argument( "--xs", type=list, default=[0,0],
                         help="x-coordinate of PSF in arcmin.  Default: 0.0")
-    parser.add_argument("-ys", type=list, default=[0, 0],
+    parser.add_argument( "--ys", type=list, default=[0,0],
                         help="y-coordinate of PSF in arcmin.  Default: 0.0")
 
     parser.add_argument("--lam", type=float, default=700.0,
@@ -290,11 +287,8 @@ if __name__ == '__main__':
                         help="Matplotlib imshow vmax kwarg for wavefront image.  Sets value "
                              "that maxes out the colorbar range.  Default: 50.0")
 
-    parser.add_argument("--outfile", type=str, default="output/psf_wf_movie.mp4",
+    parser.add_argument("--outfile", type=str, default="~/psf-movie/psf_wf_movie_6frames.mp4",
                         help="Output filename.  Default: output/psf_wf_movie.mp4")
 
-    parser.add_argument("--coord", type=list, default=[np.r_[-1, 1, -1, 1], np.r_[-1, 0, -1, 0]],
-                        help="Position of the PSF center on output image. Default: (0,0) top, (-0.5,-0.5) bottom")
-
-    args = parser.parse_args()
-    make_movie(args)
+    parser.add_argument("--coord", type=list, default=[np.r_[-1,1,-1,1],np.r_[-1,0,-1,0]],
+                        help="Position of PSF center on focal plane. Default: (0',0'), and (-0.5',-0.5') ")
