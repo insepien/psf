@@ -292,3 +292,6 @@ location on focal plane
 
     parser.add_argument("--coord", type=list, default=[np.r_[-1,1,-1,1],np.r_[-1,0,-1,0]],
                         help="Position of PSF center on focal plane. Default: (0',0'), and (-0.5',-0.5') ")
+
+    args = parser.parse_args()
+    make_movie(args)
