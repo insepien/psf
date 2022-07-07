@@ -245,9 +245,9 @@ if __name__ == '__main__':
                         help="Resolution of atmospheric screen in meters.  Default: 0.1")
     parser.add_argument("--max_speed", type=float, default=20.0,
                         help="Maximum wind speed in m/s.  Default: 20.0")
-    parser.add_argument("-xs", "--x", type=list, default=[0, 0],
+    parser.add_argument("-xs", type=list, default=[0, 0],
                         help="x-coordinate of PSF in arcmin.  Default: 0.0")
-    parser.add_argument("-ys", "--y", type=list, default=[0, 0],
+    parser.add_argument("-ys", type=list, default=[0, 0],
                         help="y-coordinate of PSF in arcmin.  Default: 0.0")
 
     parser.add_argument("--lam", type=float, default=700.0,
