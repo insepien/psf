@@ -34,11 +34,11 @@ def hex_psf(fig, ax_hexPsf, thx, thy, sigma):
     2D hexbin plot of psf position with psf size as weight
     """
     im0 = ax_hexPsf.hexbin(thx, thy, gridsize=30, C=sigma, cmap="inferno", alpha=0.75)
-    fig_config(fig, ax_hexPsf, "$\Theta_x$", "$\Theta_y$")
+    fig_config(fig, ax_hexPsf, "$\Theta_x$ [degree]", "$\Theta_y$ [degree]")
     ax_hexPsf.margins(0.1, 0.1)
     divider0 = make_axes_locatable(ax_hexPsf)
     cax0 = divider0.append_axes('top', size='5%', pad=0.1)
-    cbr0 = plt.colorbar(im0, cax=cax0, orientation='horizontal').set_label("$\sigma$")
+    cbr0 = plt.colorbar(im0, cax=cax0, orientation='horizontal').set_label("$\sigma$ [arcsec]")
     cax0.xaxis.set_ticks_position("top")
     cax0.xaxis.set_label_position("top")
     return ax_hexPsf
@@ -49,7 +49,7 @@ def hex_shear(fig, ax_hexSh, thx, thy, e1, e2):
     2D hexbin plot of psf position with shear magnitude as weight
     """
     im1 = ax_hexSh.hexbin(thx, thy, gridsize=30, C=np.hypot(e1, e2), cmap="BuPu")
-    fig_config(fig, ax_hexSh, "$\Theta_x$", "$\Theta_y$")
+    fig_config(fig, ax_hexSh, "$\Theta_x$ [degree]", "$\Theta_y$ [degree]")
     ax_hexSh.margins(0.1, 0.1)
     divider1 = make_axes_locatable(ax_hexSh)
     cax1 = divider1.append_axes('top', size='5%', pad=0.1)
@@ -70,7 +70,7 @@ def plot_whisker(ax, thx, thy, e1, e2):
     ax.set_xlim(-1.95, 1.95)
     ax.set_ylim(-1.9, 1.9)
     ax.set_xlabel('[degree]', labelpad=-2, fontsize=10)
-
+    ax.set_ylabel("[degree]", labelpad=-2, fontsize=10)
     qdict = dict(
         alpha=1,
         angles='uv',
@@ -159,7 +159,7 @@ def plot_results(args):
     ax_whisker = plot_whisker(ax_whisker, thx, thy, e1, e2)
 
     # psf hist
-    ax_hisPsf = plt_hist(fig, ax_hisPsf, sigma, "thistle", "PSF width", "Number of PSF")
+    ax_hisPsf = plt_hist(fig, ax_hisPsf, sigma, "thistle", "PSF width [arcsec]", "Number of PSF")
 
     # e1 hist
     ax_hise1 = plt_hist(fig, ax_hise1, e1, "mediumpurple", "e1", "Number of PSF")
@@ -172,13 +172,13 @@ def plot_results(args):
     fig_config(fig, ax_his2d, "e1", "e2")
 
     # r0
-    ax_r0 = plt_wind(fig, ax_r0, layers, r0w, xi, "orchid", "Altitude", "$C^2_n(h)$")
+    ax_r0 = plt_wind(fig, ax_r0, layers, r0w, xi, "orchid", "Altitude [km]", "$C^2_n(h)$ [$m^{-2/3}$]")
 
     # speed
-    ax_spd = plt_wind(fig, ax_spd, layers, spd, xi, "royalblue", "Altitude", "Speed")
+    ax_spd = plt_wind(fig, ax_spd, layers, spd, xi, "royalblue", "Altitude [km]", "Speed [m/s]")
 
     # wind dir
-    ax_dir = plt_wind(fig, ax_dir, layers, direc, xi, "palevioletred", "Altitude", "Direction")
+    ax_dir = plt_wind(fig, ax_dir, layers, direc, xi, "palevioletred", "Altitude [km]", "Direction [degree]")
     savepath = os.path.join(args.outdir, args.imageF)
     fig.savefig(savepath)
 
