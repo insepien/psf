@@ -111,6 +111,12 @@ def plt_wind(fig, ax, layers, para, x, clr, xlabel, ylabel):
     fig_config(fig, ax, xlabel, ylabel)
     return ax
 
+def his_2d(ax, e1, e2):
+    ax.hist2d(e1,e2,cmap="BuPu",bins=50)
+    ax.axhline(linewidth=1, color='k')
+    ax.axvline(linewidth=1, color='k')
+    ax.text(0.01,0.03,"$\\rho$ = %.3f" %(np.corrcoef(e1,e2)[0,1]), size=13)
+    return ax
 
 def plot_results(args):
     data = pickle.load(open(os.path.join(args.outdir, args.outfile), 'rb'))
@@ -163,13 +169,14 @@ def plot_results(args):
 
     # e1 hist
     ax_hise1 = plt_hist(fig, ax_hise1, e1, "mediumpurple", "e1", "Number of PSF")
+    ax_hise1.axvline(linewidth=3, color='w', linestyle="--")
 
     # e2 hist
     ax_hise2 = plt_hist(fig, ax_hise2, e2, "cornflowerblue", "e2", "Number of PSF")
+    ax_hise2.axvline(linewidth=3, color='w', linestyle="--")
 
     # e1, e2 hist
-    ax_his2d.hist2d(e1,e2,cmap="BuPu",bins=30)
-    fig_config(fig, ax_his2d, "e1", "e2")
+    ax_his2d = his_2d(ax_his2d, e1, e2)
 
     # r0
     ax_r0 = plt_wind(fig, ax_r0, layers, r0w, xi, "orchid", "Altitude [km]", "$C^2_n(h)$ [$m^{-2/3}$]")
@@ -179,7 +186,10 @@ def plot_results(args):
 
     # wind dir
     ax_dir = plt_wind(fig, ax_dir, layers, direc, xi, "palevioletred", "Altitude [km]", "Direction [degree]")
-    savepath = os.path.join(args.outdir, args.imageF)
+    ax_dir.set_ylim([0,360])
+    ax_dir.set_yticks([0, 90, 180, 270, 360])
+
+    savepath = os.path.join("images", args.imageF)
     fig.savefig(savepath)
 
 if __name__ == "__main__":
