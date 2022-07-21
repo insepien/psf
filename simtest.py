@@ -6,6 +6,7 @@ import galsim
 import numpy as np
 from scipy.optimize import bisect
 from astropy.utils.console import ProgressBar
+import psfws
 
 # utilities
 def lodToDol(lst):
@@ -80,16 +81,13 @@ def genAtmSummary(rng):
     }
 
 
-def psfws_param(args):
-    import psfws
-    ws = psfws.ParameterGenerator(seed=args.atmSeed)
-    params= ws.draw_parameters(nl=6)
-    params['h'] = [p - ws.h0 for p in params['h']]
-    return(params)
-
-def random_param(rng, atmSummary, args):
+# generate random atm params
+def rand_param(rng, args):
     ud = galsim.UniformDeviate(rng)
     gd = galsim.GaussianDeviate(rng)
+    
+    altitudes = [0.0, 2.58, 5.16, 7.73, 12.89, 15.46]
+    altitudes[0] = args.groundLayerHeight
 
     Eweights = np.array([0.652, 0.172, 0.055, 0.025, 0.074, 0.022])
     Uweights = np.array([1. / 6] * 6)
@@ -102,33 +100,38 @@ def random_param(rng, atmSummary, args):
 
     speeds = [ud() * args.maxSpeed for _ in range(6)]
     directions = [ud() * 360 * galsim.degrees for _ in range(6)]
-    return weights, speeds, directions
+    return speeds, directions, altitudes, weights
 
-# generate realization parameters
-def genAtmKwargs(rng, atmSummary, args):
-    """
-    calculate weights, speed, direction of each layer
-    and other paramters to create atm
-    """
-    params = psfws_param(args)
-    altitudes = params["h"]
-    # Broadcast outer scale
-    L0 = [atmSummary['L0']] * 6
+def psfws_param(args):
+    ws = psfws.ParameterGenerator(seed=args.atmSeed)
+    params= ws.draw_parameters(nl=6, location='com')
+    altitudes = [p - ws.h0 + 0.4 for p in params['h']]
+    phi = [params['phi'][i]+360 if params['phi'][i]<0 else params['phi'][i] for i in range(len(params['phi']))]
+    directions = [i*galsim.degrees for i in phi]
+    speeds = params['speed']
+    weights = params['j']
+    return speeds, directions, altitudes, weights
 
-    if args.usePsfws:
-        atmKwargs = dict(
-            r0_500=atmSummary['r0_500'], L0=L0, speed=params['speed'],
-            direction=[d * galsim.degrees for d in params['phi']],
-            altitude=altitudes, r0_weights=list(params['j']), screen_size=args.screen_size,
-            screen_scale=args.screen_scale, rng=rng
-        )
+def set_screen_size(speeds):
+    vmax = np.max(speeds)
+    if vmax > 45:
+        screen_size = args.screen_size
     else:
-        weights, speeds, directions = random_param(rng, atmSummary, args)
-        atmKwargs = dict(
-            r0_500=atmSummary['r0_500'], L0=L0, speed=speeds, direction=directions,
-            altitude=altitudes, r0_weights=weights, screen_size=args.screen_size,
-            screen_scale=args.screen_scale, rng=rng
-        )
+        screen_size = vmax * 30
+    return screen_size
+
+def genAtmKwargs(rng, atmSummary, args):
+    L0 = [atmSummary['L0']] * 6
+    if args.usePsfws:
+        speeds, directions, altitudes, weights = psfws_param(args)
+        rng.discard(18)
+    elif args.useRand:
+        speeds, directions, altitudes, weights = rand_param(rng, args)
+    atmKwargs = dict(
+        r0_500=atmSummary['r0_500'], L0=L0, speed=speeds, direction=directions,
+        altitude=altitudes, r0_weights=weights, screen_size=set_screen_size(speeds),
+        screen_scale=args.screen_scale, rng=rng
+    )
     return atmKwargs
 
 
@@ -160,7 +163,8 @@ if __name__ == '__main__':
     parser.add_argument('--outfile', type=str, default='outpsfws.pkl')
     parser.add_argument('--nPool', type=int, default=10,
             help="Number of branches for parrallelization?")
-    parser.add_argument('--usePsfws', default=False, type=lambda x: (str(x).lower() == 'true'))
+    parser.add_argument('--usePsfws', action='store_true')
+    parser.add_argument('--useRand', action='store_true')
     args = parser.parse_args()
 
     # Generate random atmospheric input statistics
