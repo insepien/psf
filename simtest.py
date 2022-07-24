@@ -31,7 +31,7 @@ def generateInput(rng):
     filterName = filters[ifilter]
     # choosing random airmass and rawseeing values
     # different air mass for different field angles
-    airmass = ud()*(1.4-1.01)+1.01
+    airmass = 1
     # atm PSF at zenith w.out effects from airmass and wavelength variations
     rawSeeing = ud()*(1.6-0.6)+0.6
 
