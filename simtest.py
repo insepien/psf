@@ -105,7 +105,7 @@ def rand_param(rng, args):
 def psfws_param(args):
     ws = psfws.ParameterGenerator(seed=args.atmSeed)
     params= ws.draw_parameters(nl=6, location='com')
-    altitudes = [p - ws.h0 + 0.4 for p in params['h']]
+    altitudes = [p - ws.h0 + 0.2 for p in params['h']]
     phi = [params['phi'][i]+360 if params['phi'][i]<0 else params['phi'][i] for i in range(len(params['phi']))]
     directions = [i*galsim.degrees for i in phi]
     speeds = params['speed']
@@ -147,13 +147,13 @@ if __name__ == '__main__':
             help="Number of PSF simulated")
     parser.add_argument('--nphot', type=int, default=int(1e6),
             help="Number of photons")
-    parser.add_argument('--screen_size', type=float, default=819.2,
+    parser.add_argument('--screen_size', type=float, default=1350,
             help="Size of atmospheric screen in meters")
     parser.add_argument('--screen_scale', type=float, default=0.1,
             help="Resolution of atmospheric screen in meters")
     parser.add_argument('--fov', type=float, default=3.5, 
             help="linear field of view in degrees")
-    parser.add_argument('--groundLayerHeight', type=float, default=0.1,
+    parser.add_argument('--groundLayerHeight', type=float, default=0.2,
             help="Ground layer height...")
     parser.add_argument('-w', type=float, default=0.0, 
             help='weight interpolation factor')
