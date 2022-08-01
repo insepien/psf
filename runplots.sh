@@ -1,15 +1,14 @@
 #!/bin/bash
-seed=("1" "7" '100' '626')
+seed=(6 7 8 9 10 22 23 25 26 27)
 len=${#seed[@]}
-var1="plotwf"
-var2=".pdf"
-var3="out"
-var4=".pkl"
+
 changeSeed() {
 	for ((i=0; i<${len}; i++))
 	do
-		python wfplot.py --imageF $var1${seed[i]}$var2 --outfile $var3${seed[i]}$var4 
-		#echo "wfsim.py --atmSeed ${seed[i]} --outfile $var1${seed[i]}$var2"
+		python wfplot.py --outfile outh_psfws_${seed[i]}.pkl --imageF outh_psfws_${seed[i]}.pdf --imageDir im_sameh0_psfws --outdir heightPsfws --usePsfws
+	echo "#"	
+		python wfplot.py --outfile outh_rand_${seed[i]}.pkl --imageF outh_rand_${seed[i]}.pdf --imageDir im_sameh0_rand --outdir heightRand --useRand
+	echo "#"
 	done
 }
 changeSeed
