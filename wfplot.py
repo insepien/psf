@@ -5,7 +5,8 @@ import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.gridspec as gridspec
 from scipy.interpolate import interp1d
-
+import treecorr
+import seaborn as sns
 
 def fig_config(fig, ax, xlabel, ylabel):
     """
@@ -23,8 +24,8 @@ def make_grid(fig, gs):
     gs = fig.add_gridspec(nrows=3, ncols=3, width_ratios=[1.5, 2, 2], height_ratios=[2, 2, 1], hspace=0.3)
     # make grid
     gs_hexbin = gs[0, 1:].subgridspec(1, 2, wspace=0.3)
-    gs_new = gs[1, 1:].subgridspec(1, 2, wspace=0.2)
-    gs_hist = gs[2, 1:].subgridspec(1, 3, wspace=0.3)
+    gs_new = gs[1, 1:].subgridspec(1, 2, wspace=0.3)
+    gs_hist = gs[2, 1:].subgridspec(1, 3, wspace=0.5)
     gs_wind = gs[:, 0].subgridspec(5, 1, hspace=0.2)
     return gs_hexbin, gs_new, gs_hist, gs_wind
 
@@ -33,12 +34,15 @@ def hex_psf(fig, ax_hexPsf, thx, thy, sigma):
     """
     2D hexbin plot of psf position with psf size as weight
     """
-    im0 = ax_hexPsf.hexbin(thx, thy, gridsize=30, C=sigma, cmap="inferno", alpha=0.75)
+    color = sns.diverging_palette(150, 260, as_cmap=True)
+    im0 = ax_hexPsf.hexbin(thx, thy, gridsize=30, C=(sigma-np.mean(sigma))*0.2, cmap=color, alpha=0.8)
     fig_config(fig, ax_hexPsf, "$\Theta_x$ [degree]", "$\Theta_y$ [degree]")
     ax_hexPsf.margins(0.1, 0.1)
     divider0 = make_axes_locatable(ax_hexPsf)
     cax0 = divider0.append_axes('top', size='5%', pad=0.1)
-    cbr0 = plt.colorbar(im0, cax=cax0, orientation='horizontal').set_label("$\sigma$ [arcsec]")
+    cbr0 = plt.colorbar(im0, cax=cax0, orientation='horizontal')
+    cbr0.set_label("$\delta \sigma$ [arcsec]")
+    cbr0.formatter.set_powerlimits((0, 0))
     cax0.xaxis.set_ticks_position("top")
     cax0.xaxis.set_label_position("top")
     return ax_hexPsf
@@ -48,12 +52,15 @@ def hex_shear(fig, ax_hexSh, thx, thy, e1, e2):
     """
     2D hexbin plot of psf position with shear magnitude as weight
     """
-    im1 = ax_hexSh.hexbin(thx, thy, gridsize=30, C=np.hypot(e1, e2), cmap="BuPu")
+    e = np.hypot(e1,e2)
+    im1 = ax_hexSh.hexbin(thx, thy, gridsize=30, C=e, cmap="BuPu")
     fig_config(fig, ax_hexSh, "$\Theta_x$ [degree]", "$\Theta_y$ [degree]")
     ax_hexSh.margins(0.1, 0.1)
     divider1 = make_axes_locatable(ax_hexSh)
     cax1 = divider1.append_axes('top', size='5%', pad=0.1)
-    cbr1 = plt.colorbar(im1, cax=cax1, orientation='horizontal').set_label("|e|")
+    cbr1 = plt.colorbar(im1, cax=cax1, orientation='horizontal')
+    cbr1.set_label("|e|")
+    cbr1.formatter.set_powerlimits((0, 0))
     cax1.xaxis.set_ticks_position("top")
     cax1.xaxis.set_label_position("top")
     return ax_hexSh
@@ -85,19 +92,33 @@ def plot_whisker(ax, thx, thy, e1, e2):
     q = ax.quiver(thx, thy, dx, dy, e, scale=1.0, **qdict)
     divider = make_axes_locatable(ax)
     ax_cb = divider.append_axes("top", size="4%", pad="2%")
-    cbar = plt.colorbar(q, cax=ax_cb, orientation='horizontal').set_label(label='|e|',
-                                                                          fontsize=12)
+    cbar = plt.colorbar(q, cax=ax_cb, orientation='horizontal')
+    cbar.set_label(label='|e|',fontsize=12)
+    cbar.formatter.set_powerlimits((0, 0))
     ax_cb.xaxis.set_ticks_position("top")
     ax_cb.xaxis.set_label_position("top")
     return ax
 
 
-def plt_hist(fig, ax, para, colour, xlabel, ylabel):
-    """
-    plot histogram
-    """
-    ax.hist(para, color=colour, bins=20)
+def plt_corr(fig, ax, thx, thy, para, xlabel, ylabel, cbarlabel, axlabel):
+    cat = treecorr.Catalog(x=thx, y=thy, k=para, x_units='degree', y_units='degree')
+    kk = treecorr.KKCorrelation(min_sep=0, max_sep=0.5,bin_type="TwoD", nbins=20, sep_units='degree')
+    kk.process(cat)
+    xim = kk.xi
+    #color = sns.diverging_palette(260, 150, as_cmap=True)
+    color=sns.light_palette("seagreen", as_cmap=True)
+    im = ax.imshow(xim, cmap=color, origin="lower", alpha=0.8)
     fig_config(fig, ax, xlabel, ylabel)
+    divider = make_axes_locatable(ax)
+    ax_cb = divider.append_axes("right", size="4%", pad="2%")
+    cbar = plt.colorbar(im, cax=ax_cb, orientation='vertical')
+    cbar.set_label(label=cbarlabel,fontsize=12)
+    cbar.formatter.set_powerlimits((0, 0))
+    ax_cb.xaxis.set_ticks_position("bottom")
+    ax_cb.xaxis.set_label_position("top")
+    ax.set_xticks(np.linspace(0,19.5,5),np.linspace(-0.5,0.5,5))
+    ax.set_yticks(np.linspace(0,19.5,5),np.linspace(-0.5,0.5,5))
+    ax.title.set_text(axlabel)
     return ax
 
 
@@ -115,7 +136,9 @@ def his_2d(ax, e1, e2):
     ax.hist2d(e1,e2,cmap="BuPu",bins=50)
     ax.axhline(linewidth=1, color='k')
     ax.axvline(linewidth=1, color='k')
-    ax.text(0.01,0.03,"$\\rho$ = %.3f" %(np.corrcoef(e1,e2)[0,1]), size=13)
+    ax.text(x=0.7,y=0.7,s="$\\rho$ = %.3f" %(np.corrcoef(e1,e2)[0,1]),transform=ax.transAxes, size=13)
+    ax.set_xlabel("e1", loc="right")
+    ax.set_ylabel("e2", loc="top")
     return ax
 
 def plot_results(args):
@@ -164,32 +187,34 @@ def plot_results(args):
     # whisker
     ax_whisker = plot_whisker(ax_whisker, thx, thy, e1, e2)
 
-    # psf hist
-    ax_hisPsf = plt_hist(fig, ax_hisPsf, sigma, "thistle", "PSF width [arcsec]", "Number of PSF")
+    # sigma corr
+    ax_hisPsf = plt_corr(fig, ax_hisPsf, thx, thy, sigma, "$\Delta$ x[degree]", "$\Delta$ y[degree]", "$cov_{i,j}$", "$\sigma$ corr")
 
-    # e1 hist
-    ax_hise1 = plt_hist(fig, ax_hise1, e1, "mediumpurple", "e1", "Number of PSF")
-    ax_hise1.axvline(linewidth=3, color='w', linestyle="--")
 
-    # e2 hist
-    ax_hise2 = plt_hist(fig, ax_hise2, e2, "cornflowerblue", "e2", "Number of PSF")
-    ax_hise2.axvline(linewidth=3, color='w', linestyle="--")
+    # e1 corr
+    ax_hise1 = plt_corr(fig, ax_hise1, thx, thy, e1, "$\Delta$ x[degree]", "", "$cov_{i,j}$", "e1 corr")
 
+    # e2 corr
+    ax_hise2 = plt_corr(fig, ax_hise2, thx, thy, e2, "$\Delta$ x[degree]", "", "$cov_{i,j}$", "e2 corr")
+    
     # e1, e2 hist
     ax_his2d = his_2d(ax_his2d, e1, e2)
 
     # r0
-    ax_r0 = plt_wind(fig, ax_r0, layers, r0w, xi, "orchid", "Altitude [km]", "$C^2_n(h)$ [$m^{-2/3}$]")
+    if args.usePsfws:
+        ax_r0 = plt_wind(fig, ax_r0, layers, r0w, xi, "purple", "Altitude [km]", "$C^2_n(h)$ [$m^{-2/3}$]")
+    elif args.useRand:
+        ax_r0 = plt_wind(fig, ax_r0, layers, r0w, xi, "purple", "Altitude [km]", "J(h) [$m^{1/3}$]")
 
     # speed
     ax_spd = plt_wind(fig, ax_spd, layers, spd, xi, "royalblue", "Altitude [km]", "Speed [m/s]")
 
     # wind dir
-    ax_dir = plt_wind(fig, ax_dir, layers, direc, xi, "palevioletred", "Altitude [km]", "Direction [degree]")
+    ax_dir = plt_wind(fig, ax_dir, layers, direc, xi, "mediumseagreen", "Altitude [km]", "Direction [degree]")
     ax_dir.set_ylim([0,360])
     ax_dir.set_yticks([0, 90, 180, 270, 360])
 
-    savepath = os.path.join("images", args.imageF)
+    savepath = os.path.join(args.imageDir, args.imageF)
     fig.savefig(savepath)
 
 if __name__ == "__main__":
@@ -201,5 +226,8 @@ if __name__ == "__main__":
     parser.add_argument("--outfile", type=str, default="out.pkl", help="input pickle file")
     parser.add_argument("--imageF", type=str, default="wfresult.png", help="result graphs file")
     parser.add_argument('--outdir', type=str, default='output')
+    parser.add_argument("--imageDir", type=str)
+    parser.add_argument("--usePsfws", action='store_true')
+    parser.add_argument('--useRand', action='store_true')
     args = parser.parse_args()
     plot_results(args)
