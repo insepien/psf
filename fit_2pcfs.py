@@ -234,7 +234,7 @@ if __name__ == '__main__':
     #details = blah 
     #plt.savefig(f'plots/{today}/2pcffit_{details}_{today}.png', dpi=150)
     # or:
-    plt.savefit(args.plotfile, dpi=150)
+    plt.savefig(args.plotfile, dpi=150)
     # and put this line up above: parser.add_argument("--plotfile", type=str)
     plt.clf()
 
