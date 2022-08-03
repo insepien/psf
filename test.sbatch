@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=16G
 #SBATCH --output=submit.%a.out
-#SBATCH --array=22,23,25-27,30-60
+#SBATCH --array=6-10
 
 source ~/setup.sh
 conda activate wfsim
