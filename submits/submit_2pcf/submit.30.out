@@ -1,0 +1,4 @@
+/home/groups/burchat/miniconda3/envs/wfsim/lib/python3.10/site-packages/treegp/kernels.py:350: RuntimeWarning: invalid value encountered in multiply
+  K[Filter] = dists[Filter] **(5./6.) *  special.kv(5./6., 2*np.pi * dists[Filter])
+/home/groups/burchat/miniconda3/envs/wfsim/lib/python3.10/site-packages/treegp/kernels.py:383: RuntimeWarning: overflow encountered in exp
+  self._L[np.diag_indices(self.ndim)] = np.exp(theta[:self.ndim])
