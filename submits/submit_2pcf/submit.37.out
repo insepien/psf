@@ -1,0 +1,4 @@
+/home/groups/burchat/miniconda3/envs/wfsim/lib/python3.10/site-packages/sklearn/gaussian_process/kernels.py:310: RuntimeWarning: overflow encountered in exp
+  params[hyperparameter.name] = np.exp(theta[i])
+/home/groups/burchat/miniconda3/envs/wfsim/lib/python3.10/site-packages/treegp/kernels.py:383: RuntimeWarning: overflow encountered in exp
+  self._L[np.diag_indices(self.ndim)] = np.exp(theta[:self.ndim])

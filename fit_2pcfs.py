@@ -165,6 +165,7 @@ if __name__ == '__main__':
     parser.add_argument("--dictfile", type=str)
     parser.add_argument("--seed", type=int)
     parser.add_argument("--plotfile", type=str)
+    parser.add_argument("--plotdir", type=str)
     args = parser.parse_args()
 
     today = datetime.today().strftime('%m%d%y')
@@ -234,7 +235,7 @@ if __name__ == '__main__':
     #details = blah 
     #plt.savefig(f'plots/{today}/2pcffit_{details}_{today}.png', dpi=150)
     # or:
-    plt.savefig(args.plotfile, dpi=150)
+    plt.savefig(os.path.join(args.plotdir,args.plotfile), dpi=150)
     # and put this line up above: parser.add_argument("--plotfile", type=str)
     plt.clf()
 

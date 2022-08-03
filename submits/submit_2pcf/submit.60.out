@@ -1,0 +1,6 @@
+/home/users/mydo/psf/fit_2pcfs.py:151: RuntimeWarning: invalid value encountered in sqrt
+  denom = l11 + l22 + 2 * np.sqrt(detL)
+/home/users/mydo/psf/fit_2pcfs.py:155: RuntimeWarning: invalid value encountered in sqrt
+  sigplus = np.sqrt((l11 + l22) / 2)
+/home/users/mydo/psf/fit_2pcfs.py:156: RuntimeWarning: invalid value encountered in double_scalars
+  sigminus = detL**(1/4)
