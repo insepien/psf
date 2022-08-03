@@ -1,0 +1,5 @@
+/var/spool/slurmd/job58670607/slurm_script: line 15: 51083 Killed                  python simtest.py --atmSeed $SLURM_ARRAY_TASK_ID --outdir heightPsfws --outfile outh_psfws_$SLURM_ARRAY_TASK_ID.pkl --usePsfws
+[0.689061   0.13703947 0.05338106 0.02781502 0.07231747 0.02038598]
+instantiating
+done
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=58670607.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.
