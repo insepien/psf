@@ -5,6 +5,8 @@ import pandas as pd
 import pickle
 from datetime import datetime
 from sklearn.gaussian_process.kernels import Kernel
+import os
+import treecorr
 
 # plotting things
 import seaborn as sns
@@ -159,8 +161,10 @@ def get_second_moment_ellipticities(L):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--simfile", type=str)
+    parser.add_argument("--simdir", type=str)
     parser.add_argument("--dictfile", type=str)
     parser.add_argument("--seed", type=int)
+    parser.add_argument("--plotfile", type=str)
     args = parser.parse_args()
 
     today = datetime.today().strftime('%m%d%y')
@@ -178,7 +182,7 @@ if __name__ == '__main__':
         kplist_dict['seed'] = [s]
 
     # load data
-    d = pickle.load(open(args.simfile, 'rb'))
+    d = pickle.load(open(os.path.join(args.simdir, args.simfile), 'rb'))
     for k in ['e1', 'e2', 'thx', 'thy', 'sigma']:
         locals()[k] = np.array(d[k])
     d_sigma = sigma - np.mean(sigma)
@@ -205,7 +209,7 @@ if __name__ == '__main__':
         # save different summary quantities of the residual to dict
         residual = measured.xi-pcf
         kplist_dict[label]['resid'].append({'sum': np.sum(residual),
-                                            'sumofabs': np.sum(np.abs(residual))
+                                            'sumofabs': np.sum(np.abs(residual)),
                                             'sumof2': np.sum(residual**2)})
 
         # this part extracts e1/e2 from the kernel above
@@ -227,10 +231,10 @@ if __name__ == '__main__':
                       [r'$\delta \sigma$', r'$e_1$', r'$e_2$'])]
 
     # save the figure 
-    details = blah 
-    plt.savefig(f'plots/{today}/2pcffit_{details}_{today}.png', dpi=150)
+    #details = blah 
+    #plt.savefig(f'plots/{today}/2pcffit_{details}_{today}.png', dpi=150)
     # or:
-    # plt.savefit(args.plotfile, dpi=150)
+    plt.savefit(args.plotfile, dpi=150)
     # and put this line up above: parser.add_argument("--plotfile", type=str)
     plt.clf()
 
