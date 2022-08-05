@@ -31,7 +31,7 @@ def make_grid(fig, gs):
     return gs_hexbin, gs_new, gs_hist, gs_wind
 
 
-def hex_psf(fig, ax_hexPsf, thx, thy, sigma):
+def hex_psf(fig, ax_hexPsf, thx, thy, sigma, args):
     """
     2D hexbin plot of psf position with psf size as weight
     """
@@ -43,14 +43,14 @@ def hex_psf(fig, ax_hexPsf, thx, thy, sigma):
     cax0 = divider0.append_axes('top', size='5%', pad=0.1)
     cbr0 = plt.colorbar(im0, cax=cax0, orientation='horizontal')
     cbr0.set_label("$\delta \sigma$ [arcsec]", size=15)
-    cbr0.formatter.set_powerlimits((0, 0))
+    cbr0.formatter.set_powerlimits((-3, 3))
     cax0.xaxis.set_ticks_position("top")
     cax0.xaxis.set_label_position("top")
     cax0.tick_params(labelsize=15)
     return ax_hexPsf
 
 
-def hex_shear(fig, ax_hexSh, thx, thy, e1, e2):
+def hex_shear(fig, ax_hexSh, thx, thy, e1, e2, args):
     """
     2D hexbin plot of psf position with shear magnitude as weight
     """
@@ -61,15 +61,15 @@ def hex_shear(fig, ax_hexSh, thx, thy, e1, e2):
     divider1 = make_axes_locatable(ax_hexSh)
     cax1 = divider1.append_axes('top', size='5%', pad=0.1)
     cbr1 = plt.colorbar(im1, cax=cax1, orientation='horizontal')
-    cbr1.set_label("|e|", size=15)
-    cbr1.formatter.set_powerlimits((0, 0))
+    cbr1.set_label("|e| ", size=15)
+    cbr1.formatter.set_powerlimits((-3, 3))
     cax1.xaxis.set_ticks_position("top")
     cax1.xaxis.set_label_position("top")
     cax1.tick_params(labelsize=15)
     return ax_hexSh
 
 
-def plot_whisker(ax, thx, thy, e1, e2):
+def plot_whisker(ax, thx, thy, e1, e2, args):
     """
     2D vector field plot of shear
     """
@@ -96,8 +96,8 @@ def plot_whisker(ax, thx, thy, e1, e2):
     divider = make_axes_locatable(ax)
     ax_cb = divider.append_axes("top", size="4%", pad="2%")
     cbar = plt.colorbar(q, cax=ax_cb, orientation='horizontal')
-    cbar.set_label(label='|e|',fontsize=15)
-    cbar.formatter.set_powerlimits((0, 0))
+    cbar.set_label(label='|e| ',fontsize=15)
+    cbar.formatter.set_powerlimits((-3, 3))
     ax_cb.xaxis.set_ticks_position("top")
     ax_cb.xaxis.set_label_position("top")
     ax_cb.tick_params(labelsize=13)
@@ -105,7 +105,7 @@ def plot_whisker(ax, thx, thy, e1, e2):
     return ax
 
 
-def plt_corr(fig, ax, thx, thy, para, xlabel, ylabel, cbarlabel, axlabel):
+def plt_corr(fig, ax, thx, thy, para, xlabel, ylabel, cbarlabel, axlabel, args):
     cat = treecorr.Catalog(x=thx, y=thy, k=para, x_units='degree', y_units='degree')
     kk = treecorr.KKCorrelation(min_sep=0, max_sep=0.5,bin_type="TwoD", nbins=20, sep_units='degree')
     kk.process(cat)
@@ -188,23 +188,23 @@ def plot_results(args):
     ax_dir = fig.add_subplot(gs_wind[3], sharex=ax_r0)
 
     # psf hexbin
-    ax_hexPsf = hex_psf(fig, ax_hexPsf, thx, thy, sigma)
+    ax_hexPsf = hex_psf(fig, ax_hexPsf, thx, thy, sigma, args)
 
     # shear hexbin
-    ax_hexSh = hex_shear(fig, ax_hexSh, thx, thy, e1, e2)
+    ax_hexSh = hex_shear(fig, ax_hexSh, thx, thy, e1, e2,args)
 
     # whisker
-    ax_whisker = plot_whisker(ax_whisker, thx, thy, e1, e2)
+    ax_whisker = plot_whisker(ax_whisker, thx, thy, e1, e2, args)
 
     # sigma corr
-    ax_hisPsf = plt_corr(fig, ax_hisPsf, thx, thy, sigma, "$\Delta$ x[degree]", "$\Delta$ y[degree]", "$cov_{i,j}$", "$\\xi_{\sigma}$")
+    ax_hisPsf = plt_corr(fig, ax_hisPsf, thx, thy, sigma, "$\Delta$ x[degree]", "$\Delta$ y[degree]", "$cov_{i,j}$", "$\\xi_{\sigma}$ ,", args)
 
 
     # e1 corr
-    ax_hise1 = plt_corr(fig, ax_hise1, thx, thy, e1, "$\Delta$ x[degree]", "", "$cov_{i,j}$", "$\\xi_{e1}$ ")
+    ax_hise1 = plt_corr(fig, ax_hise1, thx, thy, e1, "$\Delta$ x[degree]", "", "$cov_{i,j}$", "$\\xi_{e1}$ ,", args)
 
     # e2 corr
-    ax_hise2 = plt_corr(fig, ax_hise2, thx, thy, e2, "$\Delta$ x[degree]", "", "$cov_{i,j}$", "$\\xi_{e2}$ ")
+    ax_hise2 = plt_corr(fig, ax_hise2, thx, thy, e2, "$\Delta$ x[degree]", "", "$cov_{i,j}$", "$\\xi_{e2}$ ,", args)
     
     # e1, e2 hist
     ax_his2d = his_2d(ax_his2d, e1, e2)
@@ -238,5 +238,6 @@ if __name__ == "__main__":
     parser.add_argument("--imageDir", type=str)
     parser.add_argument("--usePsfws", action='store_true')
     parser.add_argument('--useRand', action='store_true')
+    parser.add_argument("--kind", type=str)
     args = parser.parse_args()
     plot_results(args)
