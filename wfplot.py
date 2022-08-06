@@ -197,14 +197,14 @@ def plot_results(args):
     ax_whisker = plot_whisker(ax_whisker, thx, thy, e1, e2, args)
 
     # sigma corr
-    ax_hisPsf = plt_corr(fig, ax_hisPsf, thx, thy, sigma, "$\Delta$ x[degree]", "$\Delta$ y[degree]", "$cov_{i,j}$", "$\\xi_{\sigma}$ ,", args)
+    ax_hisPsf = plt_corr(fig, ax_hisPsf, thx, thy, sigma, "$\Delta \Theta$ x[degree]", "$\Delta \Theta$ y[degree]", "$cov_{i,j}$", "$\\xi_{\sigma}$ ", args)
 
 
     # e1 corr
-    ax_hise1 = plt_corr(fig, ax_hise1, thx, thy, e1, "$\Delta$ x[degree]", "", "$cov_{i,j}$", "$\\xi_{e1}$ ,", args)
+    ax_hise1 = plt_corr(fig, ax_hise1, thx, thy, e1, "$\Delta \Theta$ x[degree]", "", "$cov_{i,j}$", "$\\xi_{e1}$ ", args)
 
     # e2 corr
-    ax_hise2 = plt_corr(fig, ax_hise2, thx, thy, e2, "$\Delta$ x[degree]", "", "$cov_{i,j}$", "$\\xi_{e2}$ ,", args)
+    ax_hise2 = plt_corr(fig, ax_hise2, thx, thy, e2, "$\Delta \Theta$ x[degree]", "", "$cov_{i,j}$", "$\\xi_{e2}$ ", args)
     
     # e1, e2 hist
     ax_his2d = his_2d(ax_his2d, e1, e2)
