@@ -1,5 +1,5 @@
 #!/bin/bash
-seed=(6 7 8 9 10 22 23 25 26 27)
+seed=(30 31 32 33 34 35 36 37 38 39 40)
 len=${#seed[@]}
 
 changeSeed() {
