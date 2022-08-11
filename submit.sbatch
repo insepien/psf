@@ -5,9 +5,9 @@
 #SBATCH --mail-user=mydo@stanford.edu
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=10
-#SBATCH --mem-per-cpu=5G
+#SBATCH --mem-per-cpu=6G
 #SBATCH --output=submit.h%a.out
-#SBATCH --array=51-60
+#SBATCH --array=91-130
 
 source ~/setup.sh
 conda activate wfsim
