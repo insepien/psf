@@ -126,12 +126,16 @@ def fit_2pcf(x, param):
     
     r = 1
     xs = []
-    for p in x:
-        if p[0]**2+p[1]**2 < 1:
-            xs.append(p)
+    paramC = []	
+    for i in range(len(x)):
+        if x[i][0]**2 + x[i][1]**2 < 1:
+            xs.append(x[i])
+            paramC.append(param[i])
     xs = np.array(xs)
+    paramC = np.array(paramC)
+	
 
-    fitter = treegp.two_pcf(xs, param, y_err=np.zeros(param.shape), min_sep=0.,
+    fitter = treegp.two_pcf(xs, paramC, y_err=np.zeros(param.shape), min_sep=0.,
                             max_sep=.15, nbins=17,
                             anisotropic=True, p0=[10, 0., 0.])
     opt_kernel = fitter.optimizer(kernel)
