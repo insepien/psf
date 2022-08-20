@@ -123,8 +123,15 @@ def fit_2pcf(x, param):
     invL = np.linalg.inv(L)
     kernel = "%f" % (sigma**2) + " * AnisotropicVonKarman(invLam={0!r})".format(invL)
     kernel = eval_kernel(kernel)
+    
+    r = 1
+    xs = []
+    for p in x:
+        if p[0]**2+p[1]**2 < 1:
+            xs.append(p)
+    xs = np.array(xs)
 
-    fitter = treegp.two_pcf(x, param, y_err=np.zeros(param.shape), min_sep=0.,
+    fitter = treegp.two_pcf(xs, param, y_err=np.zeros(param.shape), min_sep=0.,
                             max_sep=.15, nbins=17,
                             anisotropic=True, p0=[10, 0., 0.])
     opt_kernel = fitter.optimizer(kernel)
