@@ -97,8 +97,10 @@ def rand_param(rng, args):
     weights = [np.abs(w * (1.0 + 0.1 * gd())) for w in weights]
     weights = np.clip(weights, 0.01, 0.75)  # keep weights from straying too far.
     weights /= np.sum(weights)  # renormalize
-
-    speeds = [ud() * args.maxSpeed for _ in range(6)]
+    
+    psfws_speeds, _, _, _ = psfws_param(args)
+    rand_maxSpeed = np.max(psfws_speeds)
+    speeds = [ud() * rand_maxSpeed for _ in range(6)]
     directions = [ud() * 360 * galsim.degrees for _ in range(6)]
     return speeds, directions, altitudes, weights
 
