@@ -1,3 +1,5 @@
+#this script changes fit window to -.15,.15 and apply a circle fit
+
 import argparse
 import treegp
 import numpy as np
@@ -133,7 +135,7 @@ def fit_2pcf(x, param):
             paramC.append(param[i])
     xs = np.array(xs)
     paramC = np.array(paramC)
-	
+    
 
     fitter = treegp.two_pcf(xs, paramC, y_err=np.zeros(param.shape), min_sep=0.,
                             max_sep=.15, nbins=17,
@@ -222,7 +224,7 @@ if __name__ == '__main__':
         residual = measured.xi-pcf
         kplist_dict[label]['resid'].append({'sum': np.sum(residual),
                                             'sumofabs': np.sum(np.abs(residual)),
-                                            'sumof2': np.sum(residual**2)})
+                                                           'sumof2': np.sum(residual**2)})
 
         # this part extracts e1/e2 from the kernel above
         invLam = kernel.get_params()['k2'].invLam
